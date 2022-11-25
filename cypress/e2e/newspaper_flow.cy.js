@@ -23,6 +23,11 @@ describe(
       Cypress.Cookies.preserveOnce("jwt");
     });
 
+    afterEach(function () {
+      if (this.currentTest.state === 'failed') {
+        Cypress.runner.stop()
+      }
+    })
     describe("Newspaper page", () => {
       it("displays newspaper providers", () => {
         cy.visit(providersUrl);
