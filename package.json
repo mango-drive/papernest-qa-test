@@ -1,6 +1,7 @@
 {
   "devDependencies": {
-    "cypress": "^11.2.0"
+    "cypress": "^11.2.0",
+    "dayjs": "^1.11.6"
   },
   "scripts": {
     "cypress:open": "cypress open"
