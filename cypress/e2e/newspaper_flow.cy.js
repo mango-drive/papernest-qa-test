@@ -7,6 +7,9 @@ const referencePathname = "/mon-compte/presse/2";
 const providersSelector = '*[id^="newspaper-address_change.provider-"]';
 const referenceSelector = '*[id^="newspaper-address_change.reference"]';
 
+
+let selectedProvider
+
 describe(
   "Flow: Newspaper Address Change",
   { defaultCommandTimeout: 10000 },
@@ -18,12 +21,18 @@ describe(
     describe("Newspaper page", () => {
       it("displays newspaper providers", () => {
         cy.visit(providersUrl);
+        cy.wait(1000);
         cy.get(providersSelector).should("have.length.greaterThan", 1);
       });
 
       it("redirects to Numero d'abonné page on provider click", () => {
-        cy.get(providersSelector).first().click();
-        cy.location("pathname").should("eq", referencePathname);
+        selectedProvider =  cy.get(providersSelector).then(($providers) => {
+          return cy.get(Cypress._.sample($providers))
+        })
+        
+        selectedProvider.click()
+
+        cy.location("pathname").should("eq", referencePathname).debug();
       });
     });
 
