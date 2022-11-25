@@ -7,6 +7,7 @@ const referencePathname = "/mon-compte/presse/2";
 const addressPathname = "/mon-compte/presse/3";
 const userInfoPathname = "/mon-compte/presse/4";
 const datePathname = "/mon-compte/presse/5";
+const confirmationPathname = "/mon-compte/presse/6"
 
 // Selectors
 const providersSel = '*[id^="newspaper-address_change.provider-"]';
@@ -33,7 +34,9 @@ const user = {
   email: randomAlphaNumeric(8) + ".test@papernest.com",
   address: "157 Boulevard Macdonald 75019 Paris",
   phoneNumber: "0600000000",
+  subscriberNumber: randomAlphaNumeric(5)
 };
+let selectedDate;
 
 function withNextButtonTest(func) {
   cy.get(buttonNextSel).should("be.visible").and("have.class", "disabled");
@@ -86,7 +89,7 @@ describe(
     describe("Numero d'abonné page", () => {
       it("accepts a subscriber number and redirects to address page", () => {
         withNextButtonTest(() => {
-          cy.get(referenceSel).type(randomAlphaNumeric(5));
+          cy.get(referenceSel).type(user.subscriberNumber);
         });
 
         cy.location("pathname").should("eq", addressPathname);
@@ -136,8 +139,20 @@ describe(
 
         cy.get(datePickerInputSel).should('be.visible').click();
 
+        cy.get(todaySel).parent().invoke('attr', 'aria-label').then((date) => {
+          selectedDate = date
+        })
+
         cy.get(todaySel).click();
       });
     });
+
+    describe("Confirmation page", () => {
+      it("displays the correct information", () => {
+        cy.location("pathname").should("eq", confirmationPathname)
+
+        expect(selectedDate).to.equal('25 novembre 2022')
+      })
+    })
   }
 );
