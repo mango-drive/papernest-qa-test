@@ -21,14 +21,25 @@ const housingAddressSel = '[id="housing.address"]';
 const addressDropdownSel = '[class="dropdown-suggestions ng-star-inserted"]';
 const datePickerInputSel = 'input[id="newspaper-address_change.begin_date"]';
 const todaySel = '[class="mat-calendar-body-cell-content mat-focus-indicator mat-calendar-body-today"]';
-const confirmationDateSel = '[id="{newspaper-address_change.begin_date|dateTimeFormat:fr:dddd D MMMM YYYY}"]'
 
-const userInfoSelectors = {
+
+const USER_INFO_PAGE = {
   firstName: '[id="user.first_name"]',
   lastName: '[id="user.last_name"]',
   email: '[id="user.email"]',
   phoneNumber: '[id="user.phone_number"]',
 };
+
+const CONFIRMATION_PAGE = {
+  titleContainer: 'h1[class="title"]',
+  date: '*[id^="{newspaper-address_change.begin_date"]',
+  providerName: '[id="{newspaper-address_change.provider_name}"]',
+  newspaperReference: '[id="{newspaper-address_change.reference}"]',
+  housingAddress: '[id="{housing.address}"]',
+  email: '[id="{user.email}"]',
+  firstName: '[id="{user.first_name}"]',
+  lastName: '[id="{user.last_name}"]'
+}
 
 
 // User variables for the purpose of testing the confirmation page
@@ -37,9 +48,9 @@ const user = {
   firstName: "Sebastien",
   lastName: "Corrigan",
   email: randomAlphaNumeric(8) + ".test@papernest.com",
-  address: "157 Boulevard Macdonald 75019 Paris",
+  housingAddress: "157 Boulevard Macdonald 75019 Paris",
   phoneNumber: "0600000000",
-  subscriberNumber: randomAlphaNumeric(5)
+  newspaperReference: randomAlphaNumeric(5)
 };
 let selectedDate;
 
@@ -94,7 +105,8 @@ describe(
     describe("Numero d'abonné page", () => {
       it("accepts a subscriber number and redirects to address page", () => {
         withNextButtonTest(() => {
-          cy.get(referenceSel).type(user.subscriberNumber);
+          cy.wait(100) // flaky tests due to input failure
+          cy.get(referenceSel).type(user.newspaperReference);
         });
 
         cy.location("pathname").should("eq", addressPathname);
@@ -106,9 +118,9 @@ describe(
         withNextButtonTest(() => {
           cy.get(housingAddressSel)
             .should("not.have.class", "checked")
-            .type(user.address);
+            .type(user.housingAddress);
 
-          cy.get(addressDropdownSel).contains(user.address).click();
+          cy.get(addressDropdownSel).contains(user.housingAddress).click();
 
           cy.get(housingAddressSel).should("have.class", "checked");
         });
@@ -122,7 +134,7 @@ describe(
         cy.location("pathname").should("eq", userInfoPathname);
 
         withNextButtonTest(() => {
-          for (const [key, selector] of Object.entries(userInfoSelectors)) {
+          for (const [key, selector] of Object.entries(USER_INFO_PAGE)) {
             cy.get(selector)
               .should("not.have.class", "checked")
               .type(user[key])
@@ -160,7 +172,15 @@ describe(
         let formattedDate = dayjs(selectedDate).format('dddd D MMMM YYYY')
         formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)
 
-        cy.get(confirmationDateSel).contains(formattedDate)
+        cy.get(CONFIRMATION_PAGE.date).contains(formattedDate)
+        cy.get(CONFIRMATION_PAGE.titleContainer).contains(user.firstName)
+        cy.get(CONFIRMATION_PAGE.providerName).contains(selectedProviderName)
+
+        for(const [key, val] of Object.entries(user)) {
+          if (key === 'phoneNumber') continue;
+          cy.get(CONFIRMATION_PAGE[key]).contains(val)
+        }
+
       })
     })
   }
