@@ -10,19 +10,19 @@ const datePathname = "/mon-compte/presse/5";
 
 // Selectors
 const providersSel = '*[id^="newspaper-address_change.provider-"]';
-const referenceSel = '*[id^="newspaper-address_change.reference"]';
+const referenceSel = '[id="newspaper-address_change.reference"]';
 const buttonNextSel = "#button_next";
-const housingAddressSel = '*[id^="housing.address"]';
-const addressDropdownSel = '*[class^="dropdown-suggestions ng-star-inserted"]';
+const housingAddressSel = '[id="housing.address"]';
+const addressDropdownSel = '[class="dropdown-suggestions ng-star-inserted"]';
 const datePickerInputSel = 'input[id="newspaper-address_change.begin_date"]';
 const datePickerSel = '[id="cdk-overlay-0"]';
 const todaySel = '[class="mat-calendar-body-cell-content mat-focus-indicator mat-calendar-body-today"]';
 
 const userInfoSelectors = {
-  firstName: '*[id^="user.first_name"]',
-  lastName: '*[id^="user.last_name"]',
-  email: '*[id^="user.email"]',
-  phoneNumber: '*[id^="user.phone_number"]',
+  firstName: '[id="user.first_name"]',
+  lastName: '[id="user.last_name"]',
+  email: '[id="user.email"]',
+  phoneNumber: '[id="user.phone_number"]',
 };
 
 // User variables for the purpose of testing the confirmation page
