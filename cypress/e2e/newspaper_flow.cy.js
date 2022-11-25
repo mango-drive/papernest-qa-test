@@ -1,4 +1,4 @@
-import { randomAlphaNumeric, randomIntFromInterval } from "../support/utils";
+import { randomAlphaNumeric } from "../support/utils";
 
 const providersUrl =
   "https://app.papernest.com/onboarding?anonymous&anonymousId=test&id_text=1&destination=newspaper";
@@ -7,8 +7,7 @@ const referencePathname = "/mon-compte/presse/2";
 const providersSelector = '*[id^="newspaper-address_change.provider-"]';
 const referenceSelector = '*[id^="newspaper-address_change.reference"]';
 
-
-let selectedProvider
+let selectedProviderName;
 
 describe(
   "Flow: Newspaper Address Change",
@@ -26,19 +25,27 @@ describe(
       });
 
       it("redirects to Numero d'abonné page on provider click", () => {
-        selectedProvider =  cy.get(providersSelector).then(($providers) => {
-          return cy.get(Cypress._.sample($providers))
-        })
-        
-        selectedProvider.click()
+        // Select a random newspaper provider
+        const selectedProvider = cy.get(providersSelector)
+          .then(($providers) => {
+            return cy.get(Cypress._.sample($providers));
+          });
 
-        cy.location("pathname").should("eq", referencePathname).debug();
+        // store the provider name for later tests
+        selectedProvider.find('*[class^="text line"]').then((line) => {
+          selectedProviderName = line.text();
+        });
+
+        selectedProvider.click();
+
+        cy.location("pathname").should("eq", referencePathname);
       });
     });
 
     describe("Numero d'abonné page", () => {
       it("accepts a subscriber number and redirects to ", () => {
         cy.get(referenceSelector).type(randomAlphaNumeric(5));
+        cy.log(selectedProviderName)
       });
     });
   }
