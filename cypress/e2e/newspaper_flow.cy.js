@@ -14,10 +14,9 @@ const referenceSel = '*[id^="newspaper-address_change.reference"]';
 const buttonNextSel = "#button_next";
 const housingAddressSel = '*[id^="housing.address"]';
 const addressDropdownSel = '*[class^="dropdown-suggestions ng-star-inserted"]';
-const datePickerInputSel = '*[id^="#newspaper-address_change.begin_date"]';
-const datePickerSel =
-  "#mat-datepicker-0 > div > mat-month-view > table > tbody";
-const todaySel = "mat-calendar-body-today";
+const datePickerInputSel = 'input[id="newspaper-address_change.begin_date"]';
+const datePickerSel = '[id="cdk-overlay-0"]';
+const todaySel = '[class="mat-calendar-body-cell-content mat-focus-indicator mat-calendar-body-today"]';
 
 const userInfoSelectors = {
   firstName: '*[id^="user.first_name"]',
@@ -55,11 +54,11 @@ describe(
       Cypress.Cookies.preserveOnce("jwt");
     });
 
-    afterEach(function () {
-      if (this.currentTest.state === "failed") {
-        Cypress.runner.stop();
-      }
-    });
+    // afterEach(function () {
+    //   if (this.currentTest.state === "failed") {
+    //     Cypress.runner.stop();
+    //   }
+    // });
 
     describe("Newspaper page", () => {
       it("displays newspaper providers", () => {
@@ -117,13 +116,27 @@ describe(
         withNextButtonTest(() => {
           for (const [key, selector] of Object.entries(userInfoSelectors)) {
             cy.get(selector)
-              .and("not.have.class", "checked")
+              .should("not.have.class", "checked")
               .type(user[key])
               .should("have.class", "checked");
           }
         });
 
         cy.location("pathname").should("eq", datePathname);
+      });
+    });
+
+    describe("Date page", () => {
+      it("accepts a date", () => {
+        cy.location("pathname").should("eq", datePathname);
+
+        cy.get(buttonNextSel)
+          .should("be.visible")
+          .and("have.class", "disabled");
+
+        cy.get(datePickerInputSel).should('be.visible').click();
+
+        cy.get(todaySel).click();
       });
     });
   }
