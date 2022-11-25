@@ -1,4 +1,8 @@
 import { randomAlphaNumeric } from "../support/utils";
+const dayjs = require('dayjs')
+require('dayjs/locale/fr')
+
+dayjs.locale('fr')
 
 // Urls and pathnames
 const providersUrl =
@@ -16,8 +20,8 @@ const buttonNextSel = "#button_next";
 const housingAddressSel = '[id="housing.address"]';
 const addressDropdownSel = '[class="dropdown-suggestions ng-star-inserted"]';
 const datePickerInputSel = 'input[id="newspaper-address_change.begin_date"]';
-const datePickerSel = '[id="cdk-overlay-0"]';
 const todaySel = '[class="mat-calendar-body-cell-content mat-focus-indicator mat-calendar-body-today"]';
+const confirmationDateSel = '[id="{newspaper-address_change.begin_date|dateTimeFormat:fr:dddd D MMMM YYYY}"]'
 
 const userInfoSelectors = {
   firstName: '[id="user.first_name"]',
@@ -25,6 +29,7 @@ const userInfoSelectors = {
   email: '[id="user.email"]',
   phoneNumber: '[id="user.phone_number"]',
 };
+
 
 // User variables for the purpose of testing the confirmation page
 let selectedProviderName;
@@ -57,11 +62,11 @@ describe(
       Cypress.Cookies.preserveOnce("jwt");
     });
 
-    // afterEach(function () {
-    //   if (this.currentTest.state === "failed") {
-    //     Cypress.runner.stop();
-    //   }
-    // });
+    afterEach(function () {
+      if (this.currentTest.state === "failed") {
+        Cypress.runner.stop();
+      }
+    });
 
     describe("Newspaper page", () => {
       it("displays newspaper providers", () => {
@@ -130,7 +135,7 @@ describe(
     });
 
     describe("Date page", () => {
-      it("accepts a date", () => {
+      it("accepts a date and redirects to Confirmation page", () => {
         cy.location("pathname").should("eq", datePathname);
 
         cy.get(buttonNextSel)
@@ -144,6 +149,7 @@ describe(
         })
 
         cy.get(todaySel).click();
+        cy.location("pathname").should("eq", confirmationPathname)
       });
     });
 
@@ -151,7 +157,10 @@ describe(
       it("displays the correct information", () => {
         cy.location("pathname").should("eq", confirmationPathname)
 
-        expect(selectedDate).to.equal('25 novembre 2022')
+        let formattedDate = dayjs(selectedDate).format('dddd D MMMM YYYY')
+        formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)
+
+        cy.get(confirmationDateSel).contains(formattedDate)
       })
     })
   }
