@@ -5,9 +5,8 @@ const providersSelector = '*[id^="newspaper-address_change.provider-"]'
 const subscriberNumberSelector = '*[id^="newspaper-address_change.reference"]'
 
 describe('Flow: Newspaper Address Change', { defaultCommandTimeout: 10000 }, () => {
-  describe('Newspaper page', () => {
-    before(() => {
-      cy.visit(providersUrl)
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce('jwt')
     })
 
     it('displays newspaper providers', () => {
