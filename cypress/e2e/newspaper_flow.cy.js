@@ -14,6 +14,10 @@ const referenceSel = '*[id^="newspaper-address_change.reference"]';
 const buttonNextSel = "#button_next";
 const housingAddressSel = '*[id^="housing.address"]';
 const addressDropdownSel = '*[class^="dropdown-suggestions ng-star-inserted"]';
+const datePickerInputSel = '*[id^="#newspaper-address_change.begin_date"]';
+const datePickerSel =
+  "#mat-datepicker-0 > div > mat-month-view > table > tbody";
+const todaySel = "mat-calendar-body-today";
 
 const userInfoSelectors = {
   firstName: '*[id^="user.first_name"]',
@@ -31,6 +35,17 @@ const user = {
   address: "157 Boulevard Macdonald 75019 Paris",
   phoneNumber: "0600000000",
 };
+
+function withNextButtonTest(func) {
+  cy.get(buttonNextSel).should("be.visible").and("have.class", "disabled");
+
+  func();
+
+  cy.get(buttonNextSel)
+    .should("be.visible")
+    .and("not.have.class", "disabled")
+    .click();
+}
 
 describe(
   "Flow: Newspaper Address Change",
@@ -71,38 +86,26 @@ describe(
 
     describe("Numero d'abonné page", () => {
       it("accepts a subscriber number and redirects to address page", () => {
-        cy.get(buttonNextSel)
-          .should("be.visible")
-          .and("have.class", "disabled");
+        withNextButtonTest(() => {
+          cy.get(referenceSel).type(randomAlphaNumeric(5));
+        });
 
-        cy.get(referenceSel).type(randomAlphaNumeric(5));
-
-        cy.get(buttonNextSel)
-          .should("be.visible")
-          .and("not.have.class", "disabled")
-          .click();
         cy.location("pathname").should("eq", addressPathname);
       });
     });
 
     describe("Votre addresse page", () => {
       it("accepts an address and redirects to Vos informations page", () => {
-        cy.get(buttonNextSel)
-          .should("be.visible")
-          .and("have.class", "disabled");
+        withNextButtonTest(() => {
+          cy.get(housingAddressSel)
+            .should("not.have.class", "checked")
+            .type(user.address);
 
-        cy.get(housingAddressSel)
-          .should("not.have.class", "checked")
-          .type(user.address);
+          cy.get(addressDropdownSel).contains(user.address).click();
 
-        cy.get(addressDropdownSel).contains(user.address).click();
+          cy.get(housingAddressSel).should("have.class", "checked");
+        });
 
-        cy.get(housingAddressSel).should("have.class", "checked");
-
-        cy.get(buttonNextSel)
-          .should("be.visible")
-          .and("not.have.class", "disabled")
-          .click();
         cy.location("pathname").should("eq", userInfoPathname);
       });
     });
@@ -111,23 +114,16 @@ describe(
       it("accepts user information and redirects to Date page", () => {
         cy.location("pathname").should("eq", userInfoPathname);
 
-        cy.get(buttonNextSel)
-          .should("be.visible")
-          .and("have.class", "disabled");
+        withNextButtonTest(() => {
+          for (const [key, selector] of Object.entries(userInfoSelectors)) {
+            cy.get(selector)
+              .and("not.have.class", "checked")
+              .type(user[key])
+              .should("have.class", "checked");
+          }
+        });
 
-        for (const [key, selector] of Object.entries(userInfoSelectors)) {
-          cy.get(selector)
-            .and("not.have.class", "checked")
-            .type(user[key])
-            .should("have.class", "checked");
-        }
-
-        cy.get(buttonNextSel)
-          .should("be.visible")
-          .and("not.have.class", "disabled")
-          .click();
-
-        cy.location("pathname").should("eq", datePathname)
+        cy.location("pathname").should("eq", datePathname);
       });
     });
   }
