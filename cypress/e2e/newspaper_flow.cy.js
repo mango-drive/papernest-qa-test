@@ -1,4 +1,6 @@
 import { create_user } from "../fixtures/newspaper_address_change_flow/user.js";
+import * as paths from "../support/newspaper_address_change_flow/pathnames.js"
+
 import {
   COMMON,
   PROVIDER_PAGE,
@@ -13,15 +15,6 @@ const dayjs = require("dayjs");
 require("dayjs/locale/fr");
 
 dayjs.locale("fr");
-
-// Urls and pathnames
-const providersUrl =
-  "https://app.papernest.com/onboarding?anonymous&anonymousId=test&id_text=1&destination=newspaper";
-const referencePathname = "/mon-compte/presse/2";
-const addressPathname = "/mon-compte/presse/3";
-const userInfoPathname = "/mon-compte/presse/4";
-const datePathname = "/mon-compte/presse/5";
-const confirmationPathname = "/mon-compte/presse/6";
 
 // User variables for the purpose of testing the confirmation page
 const user = create_user()
@@ -57,7 +50,7 @@ describe(
 
     describe("Newspaper page", () => {
       it("displays newspaper providers", () => {
-        cy.visit(providersUrl);
+        cy.visit(paths.providersUrl);
         cy.wait(1000);
         cy.get(PROVIDER_PAGE.providersList).should(
           "have.length.greaterThan",
@@ -79,7 +72,7 @@ describe(
         });
 
         selectedProvider.click();
-        cy.location("pathname").should("eq", referencePathname);
+        cy.location("pathname").should("eq", paths.REFERENCE_PAGE);
       });
     });
 
@@ -90,7 +83,7 @@ describe(
           cy.get(REFERENCE_PAGE.referenceInput).type(user.newspaperReference);
         });
 
-        cy.location("pathname").should("eq", addressPathname);
+        cy.location("pathname").should("eq", paths.ADDRESS_PAGE);
       });
     });
 
@@ -111,13 +104,13 @@ describe(
           );
         });
 
-        cy.location("pathname").should("eq", userInfoPathname);
+        cy.location("pathname").should("eq", paths.USER_INFO_PAGE);
       });
     });
 
     describe("Vos informations page", () => {
       it("accepts user information and redirects to Date page", () => {
-        cy.location("pathname").should("eq", userInfoPathname);
+        cy.location("pathname").should("eq", paths.USER_INFO_PAGE);
 
         withNextButtonTest(() => {
           for (const [key, selector] of Object.entries(USER_INFO_PAGE)) {
@@ -128,13 +121,13 @@ describe(
           }
         });
 
-        cy.location("pathname").should("eq", datePathname);
+        cy.location("pathname").should("eq", paths.DATE_PAGE);
       });
     });
 
     describe("Date page", () => {
       it("accepts a date and redirects to Confirmation page", () => {
-        cy.location("pathname").should("eq", datePathname);
+        cy.location("pathname").should("eq", paths.DATE_PAGE);
 
         cy.get(COMMON.nextButton)
           .should("be.visible")
@@ -150,13 +143,13 @@ describe(
           });
 
         cy.get(DATE_PAGE.todayButton).click();
-        cy.location("pathname").should("eq", confirmationPathname);
+        cy.location("pathname").should("eq", paths.CONFIRMATION_PAGE);
       });
     });
 
     describe("Confirmation page", () => {
       it("displays the correct information", () => {
-        cy.location("pathname").should("eq", confirmationPathname);
+        cy.location("pathname").should("eq", paths.CONFIRMATION_PAGE);
 
         let formattedDate = dayjs(selectedDate).format("dddd D MMMM YYYY");
         formattedDate =
