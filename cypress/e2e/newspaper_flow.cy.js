@@ -1,3 +1,4 @@
+import { create_user } from "../fixtures/newspaper_address_change_flow/user.js";
 import {
   COMMON,
   PROVIDER_PAGE,
@@ -8,7 +9,6 @@ import {
   CONFIRMATION_PAGE,
 } from "../support/newspaper_address_change_flow/selectors.js";
 
-import { randomAlphaNumeric } from "../support/utils";
 const dayjs = require("dayjs");
 require("dayjs/locale/fr");
 
@@ -24,15 +24,10 @@ const datePathname = "/mon-compte/presse/5";
 const confirmationPathname = "/mon-compte/presse/6";
 
 // User variables for the purpose of testing the confirmation page
+const user = create_user()
+console.log(user)
+
 let selectedProviderName;
-const user = {
-  firstName: "Sebastien",
-  lastName: "Corrigan",
-  email: randomAlphaNumeric(8) + ".test@papernest.com",
-  housingAddress: "157 Boulevard Macdonald 75019 Paris",
-  phoneNumber: "0600000000",
-  newspaperReference: randomAlphaNumeric(5),
-};
 let selectedDate;
 
 function withNextButtonTest(func) {
