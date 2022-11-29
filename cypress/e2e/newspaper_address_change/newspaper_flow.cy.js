@@ -12,8 +12,6 @@ require("dayjs/locale/fr");
 
 dayjs.locale("fr");
 
-// User variables for the purpose of testing the confirmation page
-
 let sizes = ["iphone-5", "iphone-8", "macbook-15"];
 
 describe(
