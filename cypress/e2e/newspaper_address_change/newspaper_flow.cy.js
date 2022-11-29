@@ -2,7 +2,7 @@ import { validationPopUp } from "../../fixtures/newspaper_address_change_flow/co
 import { create_user } from "../../fixtures/newspaper_address_change_flow/user";
 import * as paths from "../../support/newspaper_address_change_flow/pathnames";
 import * as sels from "../../support/newspaper_address_change_flow/selectors";
-import { withCheckedTest, withNextButtonTest } from "./common";
+import { withCheckedTest, withNextButtonTest, withEnterTest } from "./common";
 import { testDisplaysCorrectInformation } from "./confirmation_page";
 import { clickOnToday } from "./date_page";
 import { testDisplaysNewspaperProviders } from "./providers_page";
@@ -12,17 +12,19 @@ require("dayjs/locale/fr");
 
 dayjs.locale("fr");
 
-let sizes = ["iphone-5", "iphone-8", "macbook-15"];
+const doneInteractionTests = {
+  nextButton: withNextButtonTest,
+  enter: withEnterTest,
+};
 
-describe(
-  "Flow: Newspaper Address Change",
-  { defaultCommandTimeout: 5000 },
-  () => {
+function testNewspaperFlow({ withDoneInteractionTest, sizes, title }) {
+  describe(title, { defaultCommandTimeout: 5000 }, () => {
     sizes.forEach(function (size) {
       const user = create_user();
 
       let selectedProviderName;
       let selectedDate;
+
       describe(`${size} tests`, () => {
         beforeEach(() => {
           Cypress.Cookies.preserveOnce("jwt");
@@ -61,12 +63,16 @@ describe(
 
         describe("Numero d'abonné page", () => {
           it("accepts a subscriber number and redirects to address page", () => {
-            withNextButtonTest(() => {
-              cy.wait(2000); // flaky tests due to input failure
-              cy.get(sels.REFERENCE_PAGE.referenceInput).type(
-                user.newspaperReference
-              );
-            });
+            cy.get(sels.REFERENCE_PAGE.referenceInput).click();
+            withDoneInteractionTest(
+              { currPage: paths.REFERENCE_PAGE, nextPage: paths.ADDRESS_PAGE },
+              () => {
+                cy.wait(1000); // flaky tests due to input failure
+                cy.get(sels.REFERENCE_PAGE.referenceInput).type(
+                  user.newspaperReference
+                );
+              }
+            );
 
             cy.location("pathname").should("eq", paths.ADDRESS_PAGE);
           });
@@ -74,16 +80,20 @@ describe(
 
         describe("Votre addresse page", () => {
           it("accepts an address and redirects to Vos informations page", () => {
-            withNextButtonTest(() => {
-              withCheckedTest(sels.HOUSING_ADDRESS_PAGE.addressInput, () => {
-                cy.get(sels.HOUSING_ADDRESS_PAGE.addressInput).type(
-                  user.housingAddress
-                );
-                cy.get(sels.HOUSING_ADDRESS_PAGE.addressDropdown)
-                  .contains(user.housingAddress)
-                  .click();
-              });
-            });
+            cy.get(sels.HOUSING_ADDRESS_PAGE.addressInput).click();
+            withDoneInteractionTest(
+              { currPage: paths.ADDRESS_PAGE, nextPage: paths.USER_INFO_PAGE },
+              () => {
+                withCheckedTest(sels.HOUSING_ADDRESS_PAGE.addressInput, () => {
+                  cy.get(sels.HOUSING_ADDRESS_PAGE.addressInput).type(
+                    user.housingAddress
+                  );
+                  cy.get(sels.HOUSING_ADDRESS_PAGE.addressDropdown)
+                    .contains(user.housingAddress)
+                    .click();
+                });
+              }
+            );
 
             cy.location("pathname").should("eq", paths.USER_INFO_PAGE);
           });
@@ -93,18 +103,19 @@ describe(
           it("accepts user information and redirects to Date page", () => {
             cy.location("pathname").should("eq", paths.USER_INFO_PAGE);
 
-            withNextButtonTest(() => {
-              for (const [key, selector] of Object.entries(
-                sels.USER_INFO_PAGE
-              )) {
-                cy.get(selector)
-                  .should("not.have.class", "checked")
-                  .type(user[key])
-                  .should("have.class", "checked");
+            withDoneInteractionTest(
+              { currPage: paths.USER_INFO_PAGE, nextPage: paths.DATE_PAGE },
+              () => {
+                for (const [key, selector] of Object.entries(
+                  sels.USER_INFO_PAGE
+                )) {
+                  cy.get(selector)
+                    .should("not.have.class", "checked")
+                    .type(user[key])
+                    .should("have.class", "checked");
+                }
               }
-            });
-
-            cy.location("pathname").should("eq", paths.DATE_PAGE);
+            );
           });
         });
 
@@ -156,5 +167,17 @@ describe(
         });
       });
     });
-  }
-);
+  });
+}
+
+testNewspaperFlow({
+  withDoneInteractionTest: doneInteractionTests.nextButton,
+  sizes: ["iphone-5", "iphone-8", "macbook-15"],
+  title: "Flow: Newspaper address change - Happy path - With Mobile"
+})
+
+testNewspaperFlow({
+  withDoneInteractionTest: doneInteractionTests.enter,
+  sizes: ["macbook-13"],
+  title: "Flow: Newspaper address change - Happy path - Enter (desktop only)",
+});
