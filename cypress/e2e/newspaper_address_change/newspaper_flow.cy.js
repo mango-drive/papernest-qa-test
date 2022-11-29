@@ -1,11 +1,11 @@
+import { validationPopUp } from "../../fixtures/newspaper_address_change_flow/content";
 import { create_user } from "../../fixtures/newspaper_address_change_flow/user";
 import * as paths from "../../support/newspaper_address_change_flow/pathnames";
 import * as sels from "../../support/newspaper_address_change_flow/selectors";
+import { withCheckedTest, withNextButtonTest } from "./common";
 import { testDisplaysCorrectInformation } from "./confirmation_page";
 import { clickOnToday } from "./date_page";
 import { testDisplaysNewspaperProviders } from "./providers_page";
-import { withNextButtonTest, withCheckedTest } from "./common";
-import { validationPopUp } from "../../fixtures/newspaper_address_change_flow/content";
 
 const dayjs = require("dayjs");
 require("dayjs/locale/fr");
