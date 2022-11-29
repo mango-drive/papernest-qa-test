@@ -4,7 +4,8 @@ import * as sels from "../../support/newspaper_address_change_flow/selectors";
 import { testDisplaysCorrectInformation } from "./confirmation_page";
 import { clickOnToday } from "./date_page";
 import { testDisplaysNewspaperProviders } from "./providers_page";
-import { withNextButtonTest, withCheckedTest } from "./common"
+import { withNextButtonTest, withCheckedTest } from "./common";
+import { validationPopUp } from "../../fixtures/newspaper_address_change_flow/content";
 
 const dayjs = require("dayjs");
 require("dayjs/locale/fr");
@@ -59,8 +60,10 @@ describe(
     describe("Numero d'abonné page", () => {
       it("accepts a subscriber number and redirects to address page", () => {
         withNextButtonTest(() => {
-          cy.wait(1000); // flaky tests due to input failure
-          cy.get(sels.REFERENCE_PAGE.referenceInput).type(user.newspaperReference);
+          cy.wait(2000); // flaky tests due to input failure
+          cy.get(sels.REFERENCE_PAGE.referenceInput).type(
+            user.newspaperReference
+          );
         });
 
         cy.location("pathname").should("eq", paths.ADDRESS_PAGE);
@@ -71,7 +74,9 @@ describe(
       it("accepts an address and redirects to Vos informations page", () => {
         withNextButtonTest(() => {
           withCheckedTest(sels.HOUSING_ADDRESS_PAGE.addressInput, () => {
-            cy.get(sels.HOUSING_ADDRESS_PAGE.addressInput).type(user.housingAddress)
+            cy.get(sels.HOUSING_ADDRESS_PAGE.addressInput).type(
+              user.housingAddress
+            );
             cy.get(sels.HOUSING_ADDRESS_PAGE.addressDropdown)
               .contains(user.housingAddress)
               .click();
@@ -107,20 +112,37 @@ describe(
           .should("be.visible")
           .and("have.class", "disabled");
 
-        clickOnToday({store: selectedDate});
+        clickOnToday({ store: selectedDate });
 
         cy.location("pathname").should("eq", paths.CONFIRMATION_PAGE);
       });
     });
 
     describe("Confirmation page", () => {
+      let formattedDate;
       it("displays the correct information", () => {
         cy.location("pathname").should("eq", paths.CONFIRMATION_PAGE);
 
-        let formattedDate = dayjs(selectedDate).format("dddd D MMMM YYYY");
+        formattedDate = dayjs(selectedDate).format("dddd D MMMM YYYY");
         formattedDate =
           formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 
+        testDisplaysCorrectInformation({
+          date: formattedDate,
+          user: user,
+          providerName: selectedProviderName,
+        });
+      });
+
+      it("opens the validation popup", () => {
+        cy.get("#button_validate_newspaper").click();
+        cy.get(".header").contains(user.firstName);
+        cy.get(".header").contains(validationPopUp.confirmationText);
+      });
+
+      it("closes the validation popup", () => {
+        cy.get(".mat-dialog__close-button").click();
+        cy.get(".filter").should("not.exist");
         testDisplaysCorrectInformation({
           date: formattedDate,
           user: user,
