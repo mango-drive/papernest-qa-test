@@ -20,8 +20,11 @@ describe(
   "Flow: Newspaper Address Change",
   { defaultCommandTimeout: 5000 },
   () => {
-
     sizes.forEach(function (size) {
+      const user = create_user();
+
+      let selectedProviderName;
+      let selectedDate;
       describe(`${size} tests`, () => {
         beforeEach(() => {
           Cypress.Cookies.preserveOnce("jwt");
